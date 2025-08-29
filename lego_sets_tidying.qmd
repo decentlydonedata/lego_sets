@@ -1,0 +1,14 @@
+---
+title: "LEGO_DATA_ANALYSIS"
+format: html
+editor: visual
+---
+
+```{r libraries}
+
+```
+
+```{r reading data sets}
+
+```
+
