@@ -6,4 +6,4 @@ Features include:
 - Favourites list which can be edited and downloaded as a csv file.
 - Statistics menu which allows the user to specify a subset of LEGO sets and then recieve summary statistics on the attributes
 
-This project was undertaken across multiple weeks and was the final custom project for an introductory programming unit for which I recieved a 95/100 for. 
+This project was undertaken across multiple weeks and was the final custom project for an introductory programming unit for which I recieved a HD for without previous Python experience. 
