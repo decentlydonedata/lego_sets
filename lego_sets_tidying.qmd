@@ -5,10 +5,66 @@ editor: visual
 ---
 
 ```{r libraries}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+```{r reading data sets}
+year2000 <- read.csv("~/lego_data/LEGO_DATA/2000.csv", row.names=1)
+year2001 <- read.csv("~/lego_data/LEGO_DATA/2001.csv", row.names=1)
+year2002 <- read.csv("~/lego_data/LEGO_DATA/2002.csv", row.names=1)
+year2003 <- read.csv("~/lego_data/LEGO_DATA/2003.csv", row.names=1)
+year2004 <- read.csv("~/lego_data/LEGO_DATA/2004.csv", row.names=1)
+year2005 <- read.csv("~/lego_data/LEGO_DATA/2005.csv", row.names=1)
+year2006 <- read.csv("~/lego_data/LEGO_DATA/2006.csv", row.names=1)
+year2007 <- read.csv("~/lego_data/LEGO_DATA/2007.csv", row.names=1)
+year2008 <- read.csv("~/lego_data/LEGO_DATA/2008.csv", row.names=1)
+year2009 <- read.csv("~/lego_data/LEGO_DATA/2009.csv", row.names=1)
+year2010 <- read.csv("~/lego_data/LEGO_DATA/2010.csv", row.names=1)
+year2011 <- read.csv("~/lego_data/LEGO_DATA/2011.csv", row.names=1)
+year2012 <- read.csv("~/lego_data/LEGO_DATA/2012.csv", row.names=1)
+year2013 <- read.csv("~/lego_data/LEGO_DATA/2013.csv", row.names=1)
+year2014 <- read.csv("~/lego_data/LEGO_DATA/2014.csv", row.names=1)
+year2015 <- read.csv("~/lego_data/LEGO_DATA/2015.csv", row.names=1)
+year2016 <- read.csv("~/lego_data/LEGO_DATA/2016.csv", row.names=1)
+year2017 <- read.csv("~/lego_data/LEGO_DATA/2017.csv", row.names=1)
+year2018 <- read.csv("~/lego_data/LEGO_DATA/2018.csv", row.names=1)
+year2019 <- read.csv("~/lego_data/LEGO_DATA/2019.csv", row.names=1)
+year2020 <- read.csv("~/lego_data/LEGO_DATA/2020.csv", row.names=1)
+year2021 <- read.csv("~/lego_data/LEGO_DATA/2021.csv", row.names=1)
+year2022 <- read.csv("~/lego_data/LEGO_DATA/2022.csv", row.names=1)
+year2023 <- read.csv("~/lego_data/LEGO_DATA/2023.csv", row.names=1)
+year2024 <- read.csv("~/lego_data/LEGO_DATA/2024.csv", row.names=1)
+year2025 <- read.csv("~/lego_data/LEGO_DATA/2025.csv", row.names=1)
+```
+```{r combining data}
+lego_data_full <- rbind(year2000, year2001, year2002, year2003, year2004, year2005, year2006, year2007, year2008, year2009,year2010, year2011, year2012, year2013, year2014, year2015, year2016, year2017, year2018, year2019, year2020, year2021, year2022, year2023, year2024, year2025)
+```
+```{r selecting relevant data}
+summary(lego_data_full)
+# Removing irrelevant variables
+lego_data_full[c("ExitDate", "LaunchDate", "Designers", "ModelDimension1", "ModelDimension2", "ModelDimension3", "USItemNumber", "EUItemNumber", "EAN", "UPC", "Width", "Height", "Depth", "Weight", "UKRetailPrice", "CARetailPrice","DERetailPrice", "BrickLinkSoldPriceNew", "BrickLinkSoldPriceUsed", "Released", "AdditionalImageCount", "InstructionsCount", "Image", "USDateAdded", "USDateRemoved", "MinifigNumbers", "AgeMax","AgeMin", "Variant", "Category", "Packaging", "Availability", "Rating")] <- list(NULL)
+
+# Filtering out sets with NA values is key variables
+lego_data_full <- lego_data_full %>%
+  filter(!is.na(USRetailPrice))
+lego_data_full <- lego_data_full %>%
+  filter(!is.na(Pieces))
+lego_data_full <- lego_data_full %>%
+  replace(is.na(.),0)
 
 ```
+```{r}
+write.csv(lego_data_full,"lego_data_cleaned.csv", row.names = FALSE)
+```
 
-```{r reading data sets}
 
+```{r}
+hist(lego_data_full$WantCount)
+boxplot(lego_data_full$WantCount)
+summary(lego_data_full$WantCount)
+summary(lego_data_full$WantCount+lego_data_full$OwnCount)
+summary(lego_data_full$Pieces)
+plot(lego_data_full$AgeMin, lego_data_full$Pieces)
 ```
 
