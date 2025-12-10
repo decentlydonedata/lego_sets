@@ -18,4 +18,4 @@ lego_ols_analysis.qmd is a R program that reports graphs and ols regressions int
 
 lego_data_kaggle.csv and lego_sets_kaggle.csv were the data set used
 
-This project represents the independent coding done to create example questions for end of semester revision sessions of first and second year econometrics.
+This project represents the independent coding done to create example questions for end of semester revision sessions of first and second year econometrics, hosted by Economic Student Society of Australia.
