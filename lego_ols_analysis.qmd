@@ -1,0 +1,262 @@
+title: "Lego Sets"
+subtitle: "Linear Regression and Data Analysis in R"
+author: "Chloe Wong"
+format: 
+  html:
+    toc: true
+    embed-resources: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
+  message = FALSE, 
+  warning = FALSE,
+  error = FALSE, 
+  out.width = "70%",
+  fig.width = 8, 
+  fig.height = 6,
+  fig.retina = 3)
+set.seed(6)
+#downloading packages into project (install beforehand)
+filter <- dplyr::filter
+library(plotly)
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(gtExtras)
+library(tidyverse)
+
+```
+
+```{r downloading data}
+#full data set
+lego_sets <- read_csv(here::here("data/lego_sets.csv"))
+#data set with pieces and prices
+lego_data <- read_csv(here::here("data/lego_data.csv"))
+```
+
+```{r cleaning up data}
+lego_data = lego_data %>% 
+  rename(Educational = Educational...21) %>%
+  rename(ActionAdventure = 'Action/Adventure') %>%
+  rename(ArtandCrafts = 'Art and crafts') %>%
+  rename(Modelmaking = 'Model making') %>%
+  rename(Modernday = 'Modern day') %>%
+  rename(Preschool = 'Pre-school')
+
+```
+
+```{r q1 slide 50}
+reg1 = lm(Rating ~  
+            Pieces +
+            Num_Instructions + 
+            Minifigures + 
+            Exclusive + 
+            Licensed,
+          data = lego_data)
+summary(reg1)
+```
+
+
+```{r q2 slide 51}
+reg2 = lm(USD_MSRP~ 
+            Year + 
+            Pieces +
+            Num_Instructions + 
+            Minifigures + 
+            Exclusive +
+            Licensed + 
+            Technical,
+          data = lego_data)
+summary(reg2)
+
+lego_data = lego_data %>%
+  mutate(techneglicensed = Technical - Licensed) 
+
+reg3 = lm(USD_MSRP~ 
+            Year + 
+            Pieces +
+            Num_Instructions + 
+            Minifigures + 
+            Exclusive +
+            techneglicensed,
+          data = lego_data)
+summary(reg3)
+
+```
+```{r q4 slide 52}
+lego_data = lego_data %>%
+  mutate(friends = ifelse(lego_data$Theme == 'Friends',1,0)) %>%
+  mutate(ninjago = ifelse(lego_data$Theme == 'Ninjago',1,0))
+reg4 = lm(Pieces ~ 
+            Year + 
+            USD_MSRP +
+            Num_Instructions + 
+            Minifigures +
+            friends + 
+            ninjago,
+          data = lego_data)
+summary(reg4)
+lego_data = lego_data %>%
+  mutate(instructionneg4minifig = Num_Instructions - 4*Minifigures) %>%
+  mutate(friend2ninjago = friends - 2*ninjago)
+reg5 = lm(Pieces ~ 
+            USD_MSRP +
+            instructionneg4minifig +
+            friend2ninjago,
+          data = lego_data)
+summary(reg5)
+
+```
+
+```{r slide 64-65}
+lego_data = lego_data %>%
+  mutate(Piecessq = Pieces*Pieces) %>%
+  filter(Rating>0)
+reg6 = lm(Rating ~  
+            Pieces + 
+            Piecessq + 
+            Num_Instructions + 
+            Minifigures,
+          data = lego_data)
+summary(reg6)
+ggplot(lego_data, 
+       aes(x=Pieces, 
+           y=Rating)) +
+  geom_point()+stat_smooth(se=F, method='lm', formula=y~poly(x,2))
+
+```
+```{r q1-4 slide 66-88}
+sete <- data.frame(Year = c(2012), Pieces = c(1112), logpieces = c(log(1112)),Num_Instructions = c(6), Minifigures = c(4))
+reg7 = lm(USD_MSRP~ 
+            Year + 
+            Pieces +
+            Num_Instructions + 
+            Minifigures,
+          data = lego_data)
+summary(reg7)
+predict(reg7, newdata = sete)
+
+lego_data = lego_data %>%
+  mutate(logprice = log(USD_MSRP))
+reg8 = lm(logprice~ Year + Pieces +Num_Instructions + Minifigures,
+          data = lego_data)
+summary(reg8)
+predict(reg8, newdata = sete)
+
+lego_data = lego_data %>%
+  mutate(logpieces = log(Pieces))
+reg9 = lm(USD_MSRP~ Year + logpieces +Num_Instructions + Minifigures,
+          data = lego_data)
+summary(reg9)
+predict(reg9, newdata = sete)
+
+lego_data = lego_data %>%
+  mutate(logprice = log(USD_MSRP)) %>%
+  mutate(logpieces = log(Pieces))
+reg10 = lm(logprice~ Year + logpieces + Num_Instructions + Minifigures,
+          data = lego_data)
+summary(reg10)
+predict(reg10, newdata = sete)
+
+ggplot(lego_data, 
+       aes(x=Pieces, 
+           y=USD_MSRP)) +
+  geom_point()+stat_smooth(se=F, method='lm')
+ggplot(lego_data, 
+       aes(x=Pieces, 
+           y=logprice)) +
+  geom_point()+stat_smooth(se=F, method='lm')
+ggplot(lego_data, 
+       aes(x=logpieces, 
+           y=USD_MSRP)) +
+  geom_point()+stat_smooth(se=F, method='lm')
+ggplot(lego_data, 
+       aes(x=logpieces, 
+           y=logprice)) +
+  geom_point()+stat_smooth(se=F, method='lm')
+```
+```{r}
+qf(0.05, 3, 5223, lower.tail = FALSE)
+```
+```{r}
+reg11 = lm(USD_MSRP~ 
+            Pieces,
+          data = lego_data)
+summary(reg11)
+reg12 = lm(USD_MSRP~ 
+            Year + 
+            Pieces,
+          data = lego_data)
+summary(reg12)
+reg13 = lm(USD_MSRP~ 
+            Pieces +
+            Num_Instructions + 
+            Minifigures,
+          data = lego_data)
+summary(reg13)
+reg14 = lm(USD_MSRP~ 
+            Year + 
+            Pieces +
+            Num_Instructions + 
+            Minifigures,
+          data = lego_data)
+summary(reg14)
+reg15 = lm(USD_MSRP~ 
+            Year + 
+            Pieces +
+            Num_Instructions + 
+            Minifigures +
+            Theme_Group,
+          data = lego_data)
+summary(reg15)
+```
+```{r slide 95-96}
+pieces <- lego_data$Pieces
+price <- lego_data$USD_MSRP
+minifigures <- lego_data$Minifigures
+  
+plot(price ~ pieces, data=lego_sets,
+     xlab="Pieces per Set", 
+     ylab="Price",
+     main="Effect of Pieces on Price",
+     xlim=c(0,1000),
+     ylim=c(0,200)) +  
+abline(lm(price ~ pieces, data=lego_sets))
+plot(minifigures ~ pieces, data=lego_sets,
+     xlab="Pieces per Set", 
+     ylab="Minifigures",
+     main="Effect of Pieces on Minifigures",
+     xlim=c(0,8000)) +
+abline(lm(minifigures ~ pieces, data=lego_sets))
+```
+```{r slide 97-102}
+reg16 = lm(Pieces ~ Minifigures + USD_MSRP + Num_Instructions,
+          data = lego_data)
+summary(reg16)
+uhat <- resid(reg16)
+areg16 = lm(I(uhat^2) ~ Minifigures + USD_MSRP + Num_Instructions, 
+            data = lego_data)
+summary(areg16)
+reg17 = lm(Pieces ~ Minifigures + USD_MSRP + Num_Instructions,
+          data = lego_data)
+summary(reg17)
+uhat <- resid(reg17)
+areg17 = mean(uhat^2)
+
+lego_data = lego_data %>%
+  mutate(minifiguressq = Minifigures*Minifigures) %>%
+  mutate(pricesq = USD_MSRP*USD_MSRP) %>%
+  mutate(instructionssq = Num_Instructions*Num_Instructions) %>%
+  mutate(minifigprice = Minifigures*USD_MSRP) %>%
+  mutate(minifiginstruct = Minifigures*Num_Instructions)%>%
+  mutate(priceinstruct = USD_MSRP*Num_Instructions)
+uhat <- resid(reg16)
+areg18 = lm(I(uhat^2) ~ Minifigures + USD_MSRP + Num_Instructions + minifiguressq + pricesq + instructionssq + minifigprice + priceinstruct + minifiginstruct, 
+            data = lego_data)
+summary(areg18)
+
+```
+

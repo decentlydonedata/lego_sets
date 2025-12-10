@@ -1,0 +1,197 @@
+title: "Lego Sets"
+subtitle: "Linear Regression and Data Analysis in R"
+author: "Chloe Wong"
+format: 
+  html:
+    toc: true
+    embed-resources: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
+  message = FALSE, 
+  warning = FALSE,
+  error = FALSE, 
+  fig.width = 8, 
+  fig.height = 6,
+  fig.retina = 3)
+set.seed(6)
+#downloading packages into project (install beforehand)
+filter <- dplyr::filter
+library(plotly)
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(gtExtras)
+library(tidyverse)
+library(stats)
+
+```
+
+```{r downloading data}
+#full data set
+lego_sets <- read_csv(here::here("data/lego_sets.csv"))
+#data set with pieces and prices
+lego_data <- read_csv(here::here("data/lego_data.csv"))
+```
+
+
+```{r peices minifigures plot}
+#scatter plot
+plot(lego_sets$Pieces, lego_sets$Minifigures,
+     xlab="Pieces per Set", #x axis title
+     ylab="Minifigures per Set", #y axis title
+     main="Pieces and Minifigures Scatterplot", #title
+     xlim=c(0,8000), #limiting range
+     ylim=c(0,40)) #limiting domain
+```
+```{r boxplot}
+#boxplot
+boxplot(lego_sets$Minifigures, 
+        ylab="Number of Minifigures", #label
+        ylim=c(0,35)) #limiting range
+
+```
+```{r linear regression}
+#simple linear regression
+reg1 <- lm(Minifigures ~ Pieces, data=lego_sets)
+summary(reg1)
+
+```
+```{r modeling linear regression}
+#defining variables as objects
+minifigures <- lego_sets$Minifigures
+pieces <- lego_sets$Pieces
+#scatter plot w/ regression line
+plot(minifigures ~ pieces, data=lego_sets,
+     xlab="Pieces per Set", 
+     ylab="Minifigures per Set",
+     main="Effect of Pieces on Minifigures",
+     xlim=c(0,8000),
+     ylim=c(0,40)) +
+  abline(lm(minifigures ~ pieces, data=lego_sets))
+```
+```{r multiple linear regression}
+#multiple linear regression
+reg2 <- lm(Rating ~ Pieces + Minifigures + USD_MSRP, data=lego_sets)
+summary(reg2)
+
+```
+```{r modeling multiple regression}
+#defining ratings to be an object
+rating <- lego_sets$Rating
+#scatterplot with regression line
+plot(rating ~ minifigures, data=lego_sets,
+     xlab="Minifigures per Set", 
+     ylab="Rating",
+     main="Effect of Minifigures on Ratings, holding Price and Pieces Constant",
+     xlim=c(0,30),
+     ylim=c(0,7)) +
+  abline(lm(Rating ~ Pieces + Minifigures + USD_MSRP, data=lego_sets))
+```
+```{r classifying models}
+training <- lego_data[1:3661,] #establishing training set
+test <- lego_data[3662:5230,] #establishing test set
+
+#defining variables for price as it is our y variable
+price <- lego_data$USD_MSRP 
+price_training <- training$USD_MSRP
+price_test <- test$USD_MSRP
+
+```
+
+```{r}
+boxplot(price)
+summary(price)
+hist(price)
+lego_data %>%
+  mutate()
+  
+logpieces <- log(lego_data$Pieces)
+reg3a <- lm(price ~ logpieces + Num_Instructions + Minifigures + Rating + Year + Exclusive, data = lego_data)
+summary(reg3a)
+```
+
+
+```{r model prediction}
+#regression for predicted price of the whole data set
+reg3 <- lm(price ~ Pieces + Num_Instructions + Minifigures + Rating + Year + Exclusive + Licensed, data = lego_data)
+summary(reg3)
+```
+```{r classifying overpriced via price difference}
+#predicted the price, price difference and whether it's overpriced more than $30
+predicted_price1 <- predict(reg3, lego_data)
+price_dif1 <- predicted_price1 - price
+overpriced <- case_when(price_dif1 > 30 ~ 1,
+                             TRUE ~ 0)
+lego_data %>%
+  mutate(overpriced) 
+
+predicted_price1_training <- predict(reg3, training)
+price_dif1_training <- predicted_price1_training - price_training
+overpriced_training <- case_when(price_dif1_training > 30 ~ 1,
+                             TRUE ~ 0)
+training %>%
+  mutate(overpriced_training) 
+
+predicted_price1_test <- predict(reg3, test)
+price_dif1_test <- predicted_price1_test - price_test
+overpriced_test <- case_when(price_dif1_test > 30 ~ 1,
+                             TRUE ~ 0)
+test %>%
+  mutate(overpriced_test) 
+
+#predicting the probability of being overpriced with training data
+fit1 <- lm(overpriced_training ~ Pieces + Num_Instructions + Minifigures + Rating + Year + Exclusive + Licensed, data = training)
+summary(fit1)
+
+```
+```{r cut off point}
+#predicting the probability of being overpriced for the test data
+predicted_prob_test <- predict(fit1, test)
+#creating model and actual overpriced variables for test data 
+not_overpriced <- "reasonable"
+model_overpriced <- rep(not_overpriced ,1569)
+model_overpriced[predicted_prob_test > 0.3] <- "overpriced"
+actual_overpriced <- rep(not_overpriced ,1569)
+actual_overpriced[overpriced_test==1] <- "overpriced”
+```
+```{r}
+#count of actual overpriced in test data
+sum(overpriced_test)
+test %>%
+  mutate(model_overpriced) 
+model_overpriced_dummy <- rep(0 ,1569)
+model_overpriced_dummy[predicted_prob_test > 0.3] <- 1
+test %>%
+  mutate(model_overpriced_dummy) %>%
+  mutate(overpriced_test) 
+```
+```{r}
+#table for the test data classified as overpriced by the model
+table(overpriced_test, model_overpriced_dummy)
+```
+
+
+```{r}
+reg4 <- glm(Licensed ~ Pieces + USD_MSRP + Owned + Retail + Rating + Year, data = lego_data, family = binomial(link = "logit"))
+summary(reg4)
+licensedprob4 <- predict(reg4, lego_data)
+
+reg5 <- glm(Licensed ~ Pieces + USD_MSRP + Owned + Retail + Rating + Year, data = lego_data, family = binomial(link = "probit"))
+summary(reg5)
+licensedprob5 <- predict(reg5, lego_data)
+
+reg6 <- lm(Licensed ~ Pieces + USD_MSRP + Owned + Retail + Rating + Year, data = lego_data)
+summary(reg6)
+licensedprob6 <- predict(reg6, lego_data)
+
+AIC(reg4)
+AIC(reg5)
+AIC(reg6)
+
+summary(lego_data)
+
+```
