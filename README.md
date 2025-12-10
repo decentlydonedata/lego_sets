@@ -12,7 +12,9 @@ This project was undertaken across multiple weeks and was the final custom proje
 
 lego_classification.qmd is a R program which uses multiple linear regression models to predict price of LEGO sets and classifies whether they are overpriced or underpriced and error rates.
 lego_ols_analysis.qmd is a R program that reports graphs and ols regressions intended for hypothesis testing. 
-- Use of log and polynomial transformations are used as well as interaction terms and testing for heteroskedasticity
+- Use of log and polynomial transformations
+- Use of interaction terms
+- Testing for heteroskedasticity
 
 lego_data_kaggle.csv and lego_sets_kaggle.csv were the data set used
 
