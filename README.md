@@ -11,6 +11,7 @@ lego_sets_tidying.qmd was the R programed used for data wrangling producing lego
 This project was undertaken across multiple weeks and was the final custom project for an introductory programming unit for which I recieved a HD for, without prior Python experience. 
 
 lego_classification.qmd is a R program which uses multiple linear regression models to predict price of LEGO sets and classifies whether they are overpriced or underpriced and error rates.
+
 lego_ols_analysis.qmd is a R program that reports graphs and ols regressions intended for hypothesis testing. 
 - Use of log and polynomial transformations
 - Use of interaction terms
